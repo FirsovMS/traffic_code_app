@@ -2,53 +2,66 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:traffic_code_app/src/data/Question.dart';
-import 'package:traffic_code_app/src/question_provider.dart';
+
+import '../main.dart';
 
 class QuestionPage extends StatefulWidget {
-  int id;
-
-  QuestionPage() {
-    this.id = Random().nextInt(1000);
-  }
-
-  QuestionPage.byId(int id) {
-    this.id = id;
-  }
+  QuestionPage({Key key}) : super(key: key);
 
   @override
-  _QuestionPageState createState() => _QuestionPageState();
+  State<StatefulWidget> createState() => new QuestionPageState();
 }
 
-class _QuestionPageState extends State<QuestionPage> {
+class QuestionPageState extends State<StatefulWidget> {
+  final int id = Random().nextInt(MyApp.questionsCount);
+
   @override
   Widget build(BuildContext context) {
-    Question question;
-    getQuestionById(widget.id).then((val) => {question = val});
-
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Question'),
-      ),
-      body: Column(
-        children: createBody(question),
-      ),
-    );
+        appBar: AppBar(
+          title: Text('Question'),
+        ),
+        body: Column(
+          children: createBody(),
+        ));
   }
 
-  createBody(Question question) {
-    return Column(
-      children: <Widget>[],
+  List<Widget> createBody() {
+    final descTextStyle = TextStyle(
+      color: Colors.black,
+      fontWeight: FontWeight.w800,
+      fontFamily: 'Roboto',
+      letterSpacing: 0.5,
+      fontSize: 18,
+      height: 2,
     );
+
+    final questionList = DefaultTextStyle.merge(
+      style: descTextStyle,
+      child: Container(
+        padding: EdgeInsets.all(20),
+        child: Column(
+          children: [
+            Text('Question Text'),
+            Column(
+              children: createVariantsWidget(['first1', 'second2', 'third3']),
+            )
+          ],
+        ),
+      )
+    );
+
+    return <Widget>[
+      questionList
+    ];
   }
 
-  Future<Question> getQuestionById(int id) async {
-    final db = await QuestionProvider.instance.database;
-    var result = await db.query(QuestionProvider.table,
-        columns: [QuestionProvider.columnJson],
-        where: '${QuestionProvider.columnId} = ?',
-        whereArgs: [id]);
+  List<Widget> createVariantsWidget(List<String> variants) {
+    var result = new List<Widget>();
+    if (variants.isNotEmpty) {
+      variants.forEach((v) => {result.add(Text(v))});
+    }
 
-    return Question.fromJson(result.first);
+    return result;
   }
 }

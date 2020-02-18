@@ -1,9 +1,11 @@
+import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart' show Database, openDatabase;
 
 class QuestionProvider {
-  static final databaseName = 'dbase.db';
-  static final databaseVersion = 1;
+  static final _databaseName = 'dbase.db';
+  static final _databaseVersion = 1;
+
   static final table = 'tab_question';
   static final columnId = 'id';
   static final columnJson = 'json';
@@ -15,7 +17,7 @@ class QuestionProvider {
   // Properties
   static Database _database;
   Future<Database> get database async {
-    if (database == null) {
+    if (_database == null) {
       _database = await initializeDatabase();
     }
 
@@ -25,7 +27,16 @@ class QuestionProvider {
   // private methods
   initializeDatabase() async {
     var documentsDirectory = await getApplicationDocumentsDirectory();
-    String path = documentsDirectory.path + databaseName;
-    return await openDatabase(path, version: databaseVersion);
+    String path = join(documentsDirectory.path, _databaseName);
+    return await openDatabase(path, version: _databaseVersion, onCreate: _onCreate);
+  }
+  
+  Future _onCreate(Database db, int version) async {
+    await db.execute('''
+      CREATE TABLE $table (
+        $columnId INTEGER PRIMARY KEY
+        $columnJson BLOB NOT NULL
+      )
+    ''');
   }
 }
