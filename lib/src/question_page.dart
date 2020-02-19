@@ -2,6 +2,9 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:traffic_code_app/src/data/question_model.dart';
+import 'package:traffic_code_app/src/question_api.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 import '../main.dart';
 
@@ -13,55 +16,141 @@ class QuestionPage extends StatefulWidget {
 }
 
 class QuestionPageState extends State<StatefulWidget> {
-  final int id = Random().nextInt(MyApp.questionsCount);
+  bool _isAnswerVisible = false;
+  bool _isProgressIndicatorVisible = true;
+
+  QuestionModel _questionModel;
+
+  //  = new QuestionModel(
+  //     text: 'Question Text',
+  //     answerId: 3,
+  //     imageUrl: "1.jpg",
+  //     variants: [
+  //       'first_first_first_first_first_first_first_first_first_first_first_first_first_first_first_first_first_',
+  //       'second_second_second_second_second_second_second_second_second_second_second_second_second_second_second_second_',
+  //       'third_third_third_third_third_third_third_third_third_third_third_third_third_third_third_third_third_third_third_'
+  //     ],
+  //     answerText:
+  //         "Some_answer_text_Some_answer_text_Some_answer_text_Some_answer_text_Some_answer_text_Some_answer_text_Some_answer_text_Some_answer_text_Some_answer_text_Some_answer_text");
+
+  void fetchData() {
+    MyApp.questionsCount.then((count) => {
+          QuestionApi.getQuestionJson(Random().nextInt(count)).then((json) => {
+                setState(() {
+                  _isProgressIndicatorVisible = false;
+                  _questionModel = QuestionModel.fromJson(json);
+                })
+              })
+        });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final bool questionLoaded = _questionModel != null;
+
     return Scaffold(
         appBar: AppBar(
           title: Text('Question'),
         ),
-        body: Column(
-          children: createBody(),
+        body: Stack(
+          children: <Widget>[
+            Visibility(
+                visible: _isProgressIndicatorVisible,
+                child: Center(child: CircularProgressIndicator())),
+            Column(
+              children:
+                  questionLoaded ? _createBody(_questionModel) : <Widget>[],
+            )
+          ],
         ));
   }
 
-  List<Widget> createBody() {
+  List<Widget> _createBody(QuestionModel question) {
     final descTextStyle = TextStyle(
       color: Colors.black,
       fontWeight: FontWeight.w800,
       fontFamily: 'Roboto',
       letterSpacing: 0.5,
-      fontSize: 18,
-      height: 2,
+      fontSize: 14,
+      height: 1.4,
     );
+
+    final _questionVariantButtons = _createQuestionVariants(question.variants);
 
     final questionList = DefaultTextStyle.merge(
-      style: descTextStyle,
-      child: Container(
-        padding: EdgeInsets.all(20),
-        child: Column(
-          children: [
-            Text('Question Text'),
-            Column(
-              children: createVariantsWidget(['first1', 'second2', 'third3']),
-            )
-          ],
-        ),
-      )
-    );
+        style: descTextStyle,
+        child: Container(
+          padding: EdgeInsets.all(20),
+          child: Column(
+            children: [
+              Container(
+                child: Text(question.text, overflow: TextOverflow.clip),
+              ),
+              question.imageUrl != null
+                  ? Container(
+                      child: FadeInImage.memoryNetwork(
+                      placeholder: kTransparentImage,
+                      image: question.imageUrl,
+                    ))
+                  : Container(),
+              Column(
+                children: _questionVariantButtons,
+              ),
+              Visibility(
+                visible: _isAnswerVisible,
+                child: Container(
+                  child: Text(
+                    question.answerText,
+                    style:
+                        TextStyle(fontWeight: FontWeight.normal, fontSize: 12),
+                    overflow: TextOverflow.clip,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ));
 
-    return <Widget>[
-      questionList
-    ];
+    return <Widget>[questionList];
   }
 
-  List<Widget> createVariantsWidget(List<String> variants) {
-    var result = new List<Widget>();
-    if (variants.isNotEmpty) {
-      variants.forEach((v) => {result.add(Text(v))});
+  void _handleSelectedId(int id) {
+    if(_isAnswerVisible){
+      return;
     }
 
-    return result;
+    setState(() {
+      _isAnswerVisible = true;
+    });
+  }
+
+  List<RaisedButton> _createQuestionVariants(List<String> variants) {
+    var list = new List<RaisedButton>();
+    for (var index = 0; index < variants.length; index++) {
+      final id = index + 1;
+      final selectedColor = _isAnswerVisible
+          ? (id == _questionModel.answerId ? Colors.green : Colors.red)
+          : Colors.black;
+
+      final textWidget = Text(
+        variants[index],
+        overflow: TextOverflow.clip,
+        textAlign: TextAlign.start,
+        style: TextStyle(fontWeight: FontWeight.normal, color: selectedColor),
+      );
+
+      list.add(RaisedButton(
+        onPressed: () => _handleSelectedId(id),
+        child: textWidget,
+      ));
+    }
+
+    return list;
   }
 }

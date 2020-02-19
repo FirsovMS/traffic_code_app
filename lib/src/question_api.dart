@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class QuestionApi {
@@ -18,8 +17,8 @@ class QuestionApi {
     }
   }
 
-  static Image getImage(String name){
-    return Image.network('$host/images/$name');
+  static String getImageURL(String name) {
+    return '$host/images/$name';
   }
 
   static Future<int> getQuestionsCount() async {

@@ -7,11 +7,15 @@ void main() => runApp(MyApp());
 class MyApp extends StatelessWidget {
   static int _questionsCount;
 
-  static int get questionsCount => _questionsCount;
+  static Future<int> get questionsCount async {
+    if(_questionsCount == null){
+      _questionsCount = await QuestionApi.getQuestionsCount();
+    }
 
-  MyApp({Key key}) : super(key: key) {
-    QuestionApi.getQuestionsCount().then((val) => _questionsCount = val);
+    return _questionsCount;
   }
+
+  MyApp({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
