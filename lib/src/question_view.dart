@@ -81,7 +81,7 @@ class QuestionPageState extends State<StatefulWidget> {
       height: 1.4,
     );
 
-    final _questionVariantButtons = _createQuestionVariants(question.variants);
+    final questionVariantButtons = _createQuestionVariants(question.variants);
 
     final questionList = DefaultTextStyle.merge(
         style: descTextStyle,
@@ -92,15 +92,9 @@ class QuestionPageState extends State<StatefulWidget> {
               Container(
                 child: Text(question.text, overflow: TextOverflow.clip),
               ),
-              question.imageUrl != null
-                  ? Container(
-                      child: FadeInImage.memoryNetwork(
-                      placeholder: kTransparentImage,
-                      image: question.imageUrl,
-                    ))
-                  : Container(),
+              _loadImage(question.imageUrl),
               Column(
-                children: _questionVariantButtons,
+                children: questionVariantButtons,
               ),
               Visibility(
                 visible: _isAnswerVisible,
@@ -120,8 +114,20 @@ class QuestionPageState extends State<StatefulWidget> {
     return <Widget>[questionList];
   }
 
+  Widget _loadImage(String url) {
+    if (url == null) {
+      return Container();
+    }
+
+    return Container(
+        child: FadeInImage.memoryNetwork(
+      placeholder: kTransparentImage,
+      image: url,
+    ));
+  }
+
   void _handleSelectedId(int id) {
-    if(_isAnswerVisible){
+    if (_isAnswerVisible) {
       return;
     }
 

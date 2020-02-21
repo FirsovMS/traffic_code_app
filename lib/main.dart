@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'src/question_page.dart';
+
+import 'src/home_view.dart';
 import 'src/question_api.dart';
+import 'src/question_view.dart';
 
 void main() => runApp(MyApp());
 
@@ -29,54 +31,6 @@ class MyApp extends StatelessWidget {
         '/': (context) => AppHomePage(title: 'Traffic Code App'),
         '/question': (context) => QuestionPage(),
       },
-    );
-  }
-}
-
-class AppHomePage extends StatefulWidget {
-  final String title;
-
-  AppHomePage({Key key, this.title}) : super(key: key);  
-
-  @override
-  State<StatefulWidget> createState() => new AppHomePageState();
-}
-
-class AppHomePageState extends State<AppHomePage> {
-  @override
-  Widget build(BuildContext context) {
-    var body = _createBody(context);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: body,
-    );
-  }
-
-   Widget _buttonsBarStart(BuildContext context) {
-    return ButtonBar(
-      alignment: MainAxisAlignment.center,
-      mainAxisSize: MainAxisSize.max,
-      children: [
-        RaisedButton(
-          onPressed: () {
-            Navigator.pushNamed(context, '/question');
-          },
-          child: Text('Start'),
-        )
-      ],
-    );
-  }
-
-  Widget _createBody(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          _buttonsBarStart(context),
-        ],
-      ),
     );
   }
 }
