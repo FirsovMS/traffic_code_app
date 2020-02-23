@@ -12,10 +12,12 @@ class QuestionProvider {
 
   // make this a singleton class
   QuestionProvider._();
+
   static final QuestionProvider instance = QuestionProvider._();
 
   // Properties
   static Database _database;
+
   Future<Database> get database async {
     if (_database == null) {
       _database = await initializeDatabase();
@@ -28,9 +30,10 @@ class QuestionProvider {
   initializeDatabase() async {
     var documentsDirectory = await getApplicationDocumentsDirectory();
     String path = join(documentsDirectory.path, _databaseName);
-    return await openDatabase(path, version: _databaseVersion, onCreate: _onCreate);
+    return await openDatabase(path,
+        version: _databaseVersion, onCreate: _onCreate);
   }
-  
+
   Future _onCreate(Database db, int version) async {
     await db.execute('''
       CREATE TABLE $table (

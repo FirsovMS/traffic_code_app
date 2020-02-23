@@ -26,10 +26,10 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      initialRoute: '/',
+      initialRoute: AppHomePage.routeName,
       routes: {
-        '/': (context) => AppHomePage(title: 'Traffic Code App'),
-        '/question': (context) => QuestionPage(),
+        AppHomePage.routeName : (context) => AppHomePage(title: 'Traffic Code App'),
+        QuestionPage.routeName : (context) => QuestionPage(),
       },
     );
   }

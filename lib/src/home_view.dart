@@ -4,8 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 import '../main.dart';
+import 'data/QuestionArguments.dart';
+import 'question_view.dart';
 
 class AppHomePage extends StatefulWidget {
+  static const routeName = 'home';
   final String title;
 
   AppHomePage({Key key, this.title}) : super(key: key);
@@ -15,6 +18,8 @@ class AppHomePage extends StatefulWidget {
 }
 
 class AppHomePageState extends State<AppHomePage> {
+  final int _randomQuestionsCount = 40;
+
   bool _canStartQuiz = false;
   int _count;
 
@@ -49,7 +54,12 @@ class AppHomePageState extends State<AppHomePage> {
       alignment: MainAxisAlignment.center,
       mainAxisSize: MainAxisSize.max,
       children: [
-        _createStartRandomButton(context),
+        Column(
+          children: <Widget>[
+            _createButtonByType(context, QuizType.RandomQuestion),
+            _createButtonByType(context, QuizType.TestQuestions),
+          ],
+        )
       ],
     );
   }
@@ -61,13 +71,20 @@ class AppHomePageState extends State<AppHomePage> {
         children: <Widget>[
           _canStartQuiz
               ? _createButtonsBar(context)
-              : Text("Can't load questions!"),
+              : _createPreLoader(),
         ],
       ),
     );
   }
 
-  int _randomQuestionsCount = 40;
+  Widget _createPreLoader() {
+    return Visibility(
+      visible: !_canStartQuiz,
+      child: Center(child: CircularProgressIndicator())
+    );
+
+    // Text("Can't load questions!")
+  }
 
   List<int> _generateRandomIds() {
     var random = new Random();
@@ -75,15 +92,33 @@ class AppHomePageState extends State<AppHomePage> {
         _randomQuestionsCount, (i) => random.nextInt(_count));
   }
 
-  Widget _createStartRandomButton(BuildContext context) {
-    final randomIds = new Map<String, dynamic>();
-    randomIds["ids"] = _generateRandomIds();
+  QuestionArguments _generateArguments(QuizType quizType) {
+    switch (quizType) {
+      case QuizType.RandomQuestion:
+        return QuestionArguments(
+          header: "Random Questions",
+          ids: _generateRandomIds(),
+          quizType: quizType
+        );
+        break;
+      case QuizType.TestQuestions:
+        return QuestionArguments(
+          header: "Test Questions",
+          ids: _generateRandomIds(),
+          quizType: quizType
+        );
+    }
+    return null;
+  }
+
+  Widget _createButtonByType(BuildContext context, QuizType quizType) {
+    final args = _generateArguments(quizType);
 
     return RaisedButton(
       onPressed: () {
-        Navigator.pushNamed(context, '/question', arguments: randomIds);
+        Navigator.pushNamed(context, QuestionPage.routeName, arguments: args);
       },
-      child: Text('Start'),
+      child: Text('Start ${args.header}'),
     );
   }
 }

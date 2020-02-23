@@ -23,7 +23,7 @@ dependencies:
   sqflite: ^1.2.0
   injector: ^1.0.8
   path_provider: ^1.6.0
-  http: ^0.12.0+4 
+  http: ^0.12.0+4
   transparent_image: ^1.0.0
   # added localization package
   flutter_localizations:

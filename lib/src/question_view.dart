@@ -1,14 +1,14 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:traffic_code_app/main.dart';
+import 'package:traffic_code_app/src/data/QuestionArguments.dart';
 import 'package:traffic_code_app/src/data/question_model.dart';
 import 'package:traffic_code_app/src/question_api.dart';
 import 'package:transparent_image/transparent_image.dart';
 
-import '../main.dart';
-
 class QuestionPage extends StatefulWidget {
+  static const routeName = '/question';
+
   QuestionPage({Key key}) : super(key: key);
 
   @override
@@ -18,7 +18,8 @@ class QuestionPage extends StatefulWidget {
 class QuestionPageState extends State<StatefulWidget> {
   bool _isAnswerVisible = false;
   bool _isProgressIndicatorVisible = true;
-
+  int currentQuestionId = 0;
+  QuestionArguments _args;
   QuestionModel _questionModel;
 
   //  = new QuestionModel(
@@ -34,8 +35,9 @@ class QuestionPageState extends State<StatefulWidget> {
   //         "Some_answer_text_Some_answer_text_Some_answer_text_Some_answer_text_Some_answer_text_Some_answer_text_Some_answer_text_Some_answer_text_Some_answer_text_Some_answer_text");
 
   void fetchData() {
+    final int id = _args.ids[currentQuestionId];
     MyApp.questionsCount.then((count) => {
-          QuestionApi.getQuestionJson(Random().nextInt(count)).then((json) => {
+          QuestionApi.getQuestionJson(id).then((json) => {
                 setState(() {
                   _isProgressIndicatorVisible = false;
                   _questionModel = QuestionModel.fromJson(json);
@@ -45,18 +47,18 @@ class QuestionPageState extends State<StatefulWidget> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    fetchData();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    if (_args == null) {
+      _args = ModalRoute.of(context).settings.arguments;
+    }
+
+    fetchData();
+
     final bool questionLoaded = _questionModel != null;
 
     return Scaffold(
         appBar: AppBar(
-          title: Text('Question'),
+          title: Text(_args.header),
         ),
         body: Stack(
           children: <Widget>[
@@ -133,6 +135,7 @@ class QuestionPageState extends State<StatefulWidget> {
 
     setState(() {
       _isAnswerVisible = true;
+      ++currentQuestionId;
     });
   }
 
